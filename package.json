@@ -1,0 +1,17 @@
+{
+  "name": "sakanin-sinirinda",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "overrides": {
+    "path-to-regexp": "^8.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,78 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sakanin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD değerini .env dosyasında ayarlayın}
+      POSTGRES_DB: ${POSTGRES_DB:-sakanin}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+      target: production
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL değerini .env dosyasında ayarlayın}
+    expose:
+      - "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app
+
+  student-web:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend.Dockerfile
+      target: student-production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app
+
+  teacher-web:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend.Dockerfile
+      target: teacher-production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app
+
+  admin-web:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend.Dockerfile
+      target: admin-production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - app
+
+volumes:
+  postgres_data:
+
+networks:
+  app:
+    internal: true
