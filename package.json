@@ -6,7 +6,8 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "create:users": "npm run build --workspace apps/api && docker compose -f compose.yaml -f compose.dev.yaml exec api npm run provision:users --workspace apps/api"
   },
   "overrides": {
     "path-to-regexp": "^8.4.2"

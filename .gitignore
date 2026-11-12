@@ -4,5 +4,8 @@ coverage/
 .env
 .env.*
 !.env.example
+config/users.json
+scenarios/videos/*
+!scenarios/videos/.gitkeep
 *.tsbuildinfo
 .DS_Store

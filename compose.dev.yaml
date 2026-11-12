@@ -5,21 +5,27 @@ services:
     command: npm run start:dev --workspace apps/api
     environment:
       NODE_ENV: development
+      WEB_ORIGINS: http://localhost:${STUDENT_DEV_PORT:-5173},http://localhost:${TEACHER_DEV_PORT:-5174},http://localhost:${ADMIN_DEV_PORT:-5175}
     volumes:
       - .:/workspace
       - /workspace/node_modules
     ports:
-      - "3000:3000"
+      - "${API_PORT:-3000}:3000"
 
   student-web:
     build:
       target: student-development
+      args:
+        VITE_API_BASE_URL: http://localhost:${API_PORT:-3000}/api
+        VITE_STUDENT_APP_URL: http://localhost:${STUDENT_DEV_PORT:-5173}
+        VITE_TEACHER_APP_URL: http://localhost:${TEACHER_DEV_PORT:-5174}
+        VITE_ADMIN_APP_URL: http://localhost:${ADMIN_DEV_PORT:-5175}
     command: npm run dev --workspace apps/student-web -- --host 0.0.0.0
     volumes:
       - .:/workspace
       - /workspace/node_modules
     ports:
-      - "5173:5173"
+      - "${STUDENT_DEV_PORT:-5173}:5173"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5173').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
@@ -29,12 +35,17 @@ services:
   teacher-web:
     build:
       target: teacher-development
+      args:
+        VITE_API_BASE_URL: http://localhost:${API_PORT:-3000}/api
+        VITE_STUDENT_APP_URL: http://localhost:${STUDENT_DEV_PORT:-5173}
+        VITE_TEACHER_APP_URL: http://localhost:${TEACHER_DEV_PORT:-5174}
+        VITE_ADMIN_APP_URL: http://localhost:${ADMIN_DEV_PORT:-5175}
     command: npm run dev --workspace apps/teacher-web -- --host 0.0.0.0
     volumes:
       - .:/workspace
       - /workspace/node_modules
     ports:
-      - "5174:5174"
+      - "${TEACHER_DEV_PORT:-5174}:5174"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5174').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s
@@ -44,12 +55,17 @@ services:
   admin-web:
     build:
       target: admin-development
+      args:
+        VITE_API_BASE_URL: http://localhost:${API_PORT:-3000}/api
+        VITE_STUDENT_APP_URL: http://localhost:${STUDENT_DEV_PORT:-5173}
+        VITE_TEACHER_APP_URL: http://localhost:${TEACHER_DEV_PORT:-5174}
+        VITE_ADMIN_APP_URL: http://localhost:${ADMIN_DEV_PORT:-5175}
     command: npm run dev --workspace apps/admin-web -- --host 0.0.0.0
     volumes:
       - .:/workspace
       - /workspace/node_modules
     ports:
-      - "5175:5175"
+      - "${ADMIN_DEV_PORT:-5175}:5175"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5175').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 10s

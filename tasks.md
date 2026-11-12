@@ -23,21 +23,27 @@ Bu dosya, kullanıcı tarafından verilen ürün ve altyapı gereksinimlerinden 
 
 ## Phase 1 — Proje iskeleti ve yerel altyapı
 
-- [ ] Öğrenci, öğretmen/uzman ve yönetici uygulamalarını ayrı ayrı derlenebilir/deploy edilebilir çalışma alanları olarak kur.
+- [x] Öğrenci, öğretmen/uzman ve yönetici uygulamalarını ayrı ayrı derlenebilir/deploy edilebilir çalışma alanları olarak kur.
 - [x] Ortak API kullanan modüler monolit backend iskeletini kur.
 - [x] PostgreSQL için ayrı Docker servisi, kalıcı volume ve yalnızca iç ağ bağlantısı ekle.
-- [ ] Tek Compose projesinde geliştirme ve üretim override'larını hazırla; servislerin bağımsız derleme/başlatma akışlarını doğrula.
+- [x] Tek Compose projesinde geliştirme ve üretim override'larını hazırla; servislerin bağımsız derleme/başlatma akışlarını doğrula.
 - [x] Örnek environment dosyası ve yerel çalıştırma/ileride sunucuya taşıma dokümantasyonu ekle; gerçek sırları depoya koyma.
-- [ ] Kurulum, derleme ve temel servis sağlık kontrollerini çalıştırıp sonuçları doğrula.
+- [x] Kurulum, derleme ve temel servis sağlık kontrollerini çalıştırıp sonuçları doğrula.
 
-Phase 1 notu: Üç ön yüz ve API ayrı ayrı derlendi; API `/api/health` endpoint'i HTTP 200 döndürdü. Compose YAML dosyaları statik olarak ayrıştırıldı; veritabanının host portu yayımlamadığı, iç ağda kaldığı ve kalıcı volume kullandığı doğrulandı. Bu ortamda Docker bulunmadığından container build/başlatma, Compose override'ları ve PostgreSQL sağlık kontrolü henüz çalıştırılamadı; bu ölçütler doğrulanana kadar ilgili kutular tamamlanmış sayılmayacaktır.
+Phase 1 doğrulaması: Geliştirme Compose projesi çalıştırıldı; üç arayüz host'tan HTTP 200, API sağlık kontrolü HTTP 200 döndürdü ve PostgreSQL sağlıklı duruma geçti. Şema tabloları oluşturuldu, kalıcı volume doğrulandı ve PostgreSQL için host port eşlemesi olmadığı incelendi. Üretim override'ı ayrı bir Compose projesinde başlatıldı; üç Nginx arayüzü ve Nginx üzerinden API sağlık isteği HTTP 200 döndürdü. Öğrenci servisi bağımsız yeniden derlendi; tüm üretim imajları oluşturuldu. `npm run build` ve `npm run typecheck` başarılı oldu. Uygulama ağı ile yalnızca API ve veritabanını birleştiren izole iç `data` ağı, yerel host portlarını erişilebilir kılacak şekilde ayrıldı.
 
 ## Phase 2 — Kimlik, roller ve özel öğrenci verileri
 
 - [ ] Öğrenci, öğretmen/uzman ve yönetici rolleri için kimlik doğrulama ve sunucu tarafı yetkilendirme uygula.
+- [x] `student`, `teacher` ve `admin` türündeki hesapları kullanıcı adı/parola JSON şablonundan güvenli ve atomik olarak içe aktar.
+- [x] Tanıtım sayfası ve rol seçtirmeyen ortak giriş ekle; başarılı girişte role göre doğru uygulamaya yönlendir.
 - [ ] Öğrenciye ait soru, yanıt, ilerleme ve yansıtma kayıtlarını öğrenci kimliğiyle ilişkilendir.
 - [ ] Öğrenci API erişimlerinde sahiplik kontrolünü sunucu tarafında uygula; başka öğrencinin kayıtlarına erişimi engelle.
 - [ ] Kimlik doğrulama, rol sınırları ve kayıt sahipliği için otomatik testler ekle ve çalıştır.
+
+Phase 2 ilerleme notu: Kullanıcı adı/parola ile giriş, sunucu oturumu, JSON üzerinden rol tipli hesap içe aktarma ve role göre yönlendirme eklendi. Senaryo yanıtları öğrenci kimliğiyle saklanıp yalnızca sahibine açılıyor. Öğrenci soruları ve ayrı ilerleme kayıtları ile otomatik yetkilendirme testleri henüz tamamlanmadı. Tüm Phase 2 kabul ölçütleri tamamlanmamıştır.
+
+Kimlik/giriş değişikliği doğrulaması: JSON şablonundan öğrenci, öğretmen ve yönetici hesapları oluşturulup her rolün doğru arayüze yönlendiği tarayıcıda doğrulandı. Oturumsuz öğretmen adresinin ortak girişe yönlenmesi, tanıtım sayfası ve yalnızca kullanıcı adı/parola isteyen ortak giriş de doğrulandı. Geçici test hesapları ve `config/users.json` silindi; kalıcı veritabanı volume'u korundu. `npm run build`, `npm run typecheck`, `npm audit --omit=dev` ve geliştirme/üretim Compose yapılandırma kontrolleri başarılıdır. Üç arayüz ve API sağlık kontrolü HTTP 200 döndürmektedir.
 
 ## Phase 3 — Senaryolar ve öğrenci öğrenme akışı
 
@@ -45,6 +51,8 @@ Phase 1 notu: Üç ön yüz ve API ayrı ayrı derlendi; API `/api/health` endpo
 - [ ] Öğrencinin yanıtlarını ve ilerlemesini kaydet; kişisel yansımaları varsayılan olarak özel tut.
 - [ ] Doğru/yanlış geri bildirimi, kesin zorbalık sınıflandırması veya görüşe bağlı ödül üretmediğini doğrula.
 - [ ] Öğrenme akışını ve gizlilik davranışlarını otomatik testlerle doğrula.
+
+Phase 3 ilerleme notu: İçerik başlangıç verisi olmadan modüler senaryo API'si ve yönetici taslak/yayın akışı eklendi. Öğrenciler yalnızca yayımlanmış senaryoları görüp yansıtıcı yanıtlarını kendi hesaplarına kaydedebiliyor; doğru/yanlış değerlendirmesi üretilmiyor. Uçtan uca veritabanı doğrulaması ve otomatik gizlilik testleri Docker/PostgreSQL ortamında henüz çalıştırılmadı.
 
 ## Phase 4 — Öğretmen/uzman ve yönetici akışları
 
